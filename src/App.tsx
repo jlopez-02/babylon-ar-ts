@@ -8,6 +8,7 @@ function App() {
     <div className="App">
       <div className='MainContainer'>
         <PreviewContainer/>
+        <div>Hola mundo </div>
       </div>
     </div>
   );
