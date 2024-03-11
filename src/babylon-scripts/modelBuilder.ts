@@ -6,5 +6,6 @@ export const createModel = (scene: BABYLON.Scene): BABYLON.Mesh => {
 };
 
 export const updateModelPosition = (plane: BABYLON.IWebXRPlane, cube: BABYLON.Mesh, scene: BABYLON.Scene): void => {
-  // Adaptar la lógica para posicionar y rotar el cubo basado en el plano detectado
+  let planeMatrix = BABYLON.Matrix.FromArray(plane.transformationMatrix.m);
+  
 };
