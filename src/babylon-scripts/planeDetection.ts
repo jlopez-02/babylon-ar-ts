@@ -55,8 +55,6 @@ export class XrExperienceWithPlaneDetection {
 
         try {
             this._xrPlanes = this._fm.enableFeature(WebXRFeatureName.PLANE_DETECTION, "latest") as WebXRPlaneDetector;
-            console.log("Detección de planos activa");
-            
         } catch (error) {
             console.error(error);
         }
@@ -74,7 +72,7 @@ export class XrExperienceWithPlaneDetection {
         model.scaling._x = model.scaling._x * 2;
 
         let normal = new BABYLON.Vector3();
-        let position = new BABYLON.Vector3();
+        //let position = new BABYLON.Vector3();
         let floorNormal = new BABYLON.Vector3();
         let wallNormal = new BABYLON.Vector3();
         let conH = 0;
@@ -85,7 +83,8 @@ export class XrExperienceWithPlaneDetection {
             mat = new StandardMaterial("mat", this._scene);
             mat.alpha = 0.35;
             mat.diffuseColor = Color3.Random();
-            this.initPolygon(plane, mat);
+            
+            let planeMesh = this.initPolygon(plane, mat);
             
             let transformationMatrix = plane.transformationMatrix.m;
             let planeMatrix = BABYLON.Matrix.FromArray(transformationMatrix);
@@ -101,10 +100,6 @@ export class XrExperienceWithPlaneDetection {
 
             normal.normalize();
 
-            position = BABYLON.Vector3.TransformCoordinates(
-                BABYLON.Vector3.Zero(),
-                planeMatrix
-            );
 
             if(plane.xrPlane.orientation.match("Horizontal")){
                 console.log("Horizontal plane");
@@ -112,7 +107,7 @@ export class XrExperienceWithPlaneDetection {
                 if (conH < 1) {
                     floorNormal = normal;
                     console.log(floorNormal);
-                    model.position.y = position.y + cubeSize / 2;
+                    model.position.y = planeMesh.position.y + cubeSize / 2;
       
                     conH++;
                 }
@@ -121,17 +116,11 @@ export class XrExperienceWithPlaneDetection {
                 console.log("Vertical plane");
 
                 if (conV < 1) {
-                    console.log(wallNormal);
-                    model.position.x = position.x - cubeSize / 2;
-                    model.position.z = position.z - cubeSize / 2;
-      
-                    const planeMatrix = BABYLON.Matrix.FromArray(transformationMatrix);
-                    const planeNormal = new BABYLON.Vector3(planeMatrix.m[8], planeMatrix.m[9], planeMatrix.m[10]);
-                    planeNormal.normalize();
-      
-                    let angle = Math.atan2(planeNormal.x, planeNormal.z);
+                    wallNormal = normal;
+                    model.position.x = planeMesh.position.x - cubeSize / 2;
+                    model.position.z = planeMesh.position.z - cubeSize / 2;
+                    let angle = Math.atan2(wallNormal.x, wallNormal.z);
                     model.rotation.y = angle + Math.PI / 2;
-      
                     conV++;
                 }
             }
@@ -181,11 +170,11 @@ export class XrExperienceWithPlaneDetection {
         plane.mesh.checkCollisions = true;
         plane.mesh.receiveShadows = true;
 
-        //plane.transformationMatrix.decompose(polygon.scaling, polygon.rotationQuaternion, polygon.position);
         plane.transformationMatrix.decompose(plane.mesh.scaling, plane.mesh.rotationQuaternion, plane.mesh.position);
-        this._planes[plane.id] = (polygon);
+        
+        this._planes[plane.id] = (plane.mesh);
 
-        return polygon;
+        return plane.mesh;
     }
 }
 
